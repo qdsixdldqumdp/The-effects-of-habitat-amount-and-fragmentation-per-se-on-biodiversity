@@ -134,7 +134,7 @@ for (diver in c("sp","shannon","simpson" ,"invsimpson" )) {
       
       new_data2 <-new_data[,1:4]
       
-      ylim_max<-max(new_data$sp)
+      ylim_max<-max(new_data$sp)*1.02
       ylim_min<-min(new_data$sp)
       for (colind in 1:5) {
         pool<-groupcol[colind]
@@ -244,7 +244,7 @@ for (diver in c("sp","shannon","simpson" ,"invsimpson" )) {
         rowen<-modelrow#筛选p与aic
         deterdf<-modeldf[rowst:rowen,4:6]
         deterdf[,1]<-1:4
-        if(deterdf[1,2]<0.05){
+        if(T){#deterdf[1,2]<0.05
           fnum<-1
           p2<-c(p2,deterdf[1,2])
           plotmodel<-modelvec[fnum]
@@ -293,11 +293,19 @@ for (diver in c("sp","shannon","simpson" ,"invsimpson" )) {
       
       yposilen<-ylim_max-myymin
       if(diver=="shannon"){
-        yposi<-seq(from=55,by=7,length.out=5)/100*yposilen+min(myymin)
+        yposi<-c(3,13,seq(from=70,by=8,length.out=3))/100*yposilen+min(myymin)
       }else if(diver=="simpson"){
-        yposi<-c(-5,3,seq(from=80,by=7,length.out=3))/100*yposilen+min(myymin)
+        if(disper=="near"){
+          if(enviro>3){
+            yposi<-c(seq(from=58,by=8,length.out=5))/100*yposilen+min(myymin)
+            }else{
+              yposi<-c(3,seq(from=65,by=8,length.out=4))/100*yposilen+min(myymin)}}else{
+                if(enviro==1){
+                  yposi<-c(seq(from=3,by=8,length.out=4),80)/100*yposilen+min(myymin) }else{
+        yposi<-c(3,13,seq(from=70,by=8,length.out=3))/100*yposilen+min(myymin)}
+                }
       }else if(diver=="sp"){
-        yposi<-seq(from=40,by=8,length.out=5)/100*yposilen+min(myymin)
+        yposi<-seq(from=45,by=8,length.out=5)/100*yposilen+min(myymin)
       }else{
         yposi<-seq(from=30,by=8,length.out=5)/100*yposilen+min(myymin)
       }
@@ -319,7 +327,7 @@ for (diver in c("sp","shannon","simpson" ,"invsimpson" )) {
         geom_line(data = new_data2,aes(x=patch,y=sp,group=poolposible,color=poolposible),size=plotsize/9)+
         geom_errorbar(size=plotsize/9,aes(ymin=sp-se, ymax=sp+se), width=xzhiyu*0.05)+
         annotate("text",x=p_vx,y=yposi, label = p2, parse = TRUE,size=plotsize,color=col1)+
-        annotate("text",x=-Inf,y=Inf,hjust=-1,vjust=2,label=LETTERS[letind],color="black",fontface = "bold",size=plotsize)+
+        annotate("text",x=-Inf,y=Inf,hjust=-0.5,vjust=1.1,label=LETTERS[letind],color="black",fontface = "bold",size=plotsize)+
         xlab(NULL)+ylab(NULL)+#ylim(0,ylim_max)+
         guides(color = guide_legend(title = "Immigration rate"))+
         scale_x_continuous(breaks = xcontinu ,labels = if(letind%in%c(1:3*5)){paste0(xcontinu)}else{NULL})+
@@ -364,7 +372,7 @@ for (diver in c("sp","shannon","simpson" ,"invsimpson" )) {
   #x = pinx, y = piny, w = pinw, h = pinh, just = c("right", "bottom")
   pinx=1
   lengend_h<-0.02
-  piny=0.03
+  piny=0.04
   pinw=layweight*0.6
   pinh=layweight
   titlefontsize<-40
@@ -446,12 +454,29 @@ for (diver in c("sp","shannon","simpson" ,"invsimpson" )) {
   
   dev.off()
   #image_crop(image_read(jpgfile),geometry ="1300x2200+1200+420")
-  image_write(image_crop(image_read(jpgfile),geometry ="1300x2200+1150+420"),jpgfile)#看图像大小
+  image_write(image_crop(image_read(jpgfile),geometry ="1300x2200+1220+410"),jpgfile)#看图像大小
   
 }
 
 }
+
+
+jieguo<-data.frame("wu"=1,"hao"=1,"fu"=1,"qu"=1)
+for (index in 1:4) {
+  tiqu<-lunwenlist[index]
+  weizhi<-str_locate_all(tiqu,"参数组合")|>as.data.frame()
+  weizhi<-weizhi$start
+  for (i in 1:length(weizhi)) {
+    jieguo[index,i]<-str_extract_all(substr(tiqu,weizhi[i]-4,weizhi[i]-1), "\\d+")[[1]]|>as.numeric()
+  }
+}
+zongjie<-"总体而言，在总共300中参数（75*4种多样性指数）组合中，纯栖息地变化与多样性之间无相关的占比pnoef%（nnoef种参数组合，p ≥ 0.05）正相关占比为pposi% (nposi种参数组合，p<0.05)，负相关占比为pneg% (nneg种参数组合，p<0.05)，单峰曲线占比为pgao%（ngao种参数组合）。"
+res_sum<-colSums(jieguo)|>as.vector()
+tivec<-c("pnoef","nnoef","pposi","nposi","pneg","nneg","pgao","ngao")
+for (ti in 1:4) {
+  zongjie<-gsub(tivec[ti*2-1],res_sum[ti]/sum(res_sum)*100,zongjie)
+zongjie<-gsub(tivec[ti*2],res_sum[ti],zongjie)
+}
 lunwenlist
-
-
+zongjie
 
