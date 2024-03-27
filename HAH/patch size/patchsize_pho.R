@@ -279,10 +279,16 @@ for (diver in c("sp","shannon","simpson" ,"invsimpson" )) {
       myymin<-floor(ylim_min/beilv)*beilv
       
       yposilen<-ylim_max-myymin
-      if(diver=="shannon"){
-        yposi<-seq(from=55,by=7,length.out=5)/100*yposilen+min(myymin)
-      }else if(diver=="simpson"){
-        yposi<-c(-5,3,seq(from=80,by=7,length.out=3))/100*yposilen+min(myymin)
+      if(diver=="shannon"){if(disper=="near"){
+        if(enviro==1){yposi<-c(3,13,seq(from=65,by=8,length.out=3))/100*yposilen+min(myymin)}else{yposi<-c(3,13,seq(from=55,by=8,length.out=3))/100*yposilen+min(myymin)}
+        }else{
+        yposi<-c(3,seq(from=55,by=8,length.out=4))/100*yposilen+min(myymin)}
+      }else if(diver=="simpson"){if(disper=="near"){
+        if(enviro<6){yposi<-c(3,11,19,75,85)/100*yposilen+min(myymin)
+        }else if(enviro==12){yposi<-c(3,11,19,27,85)/100*yposilen+min(myymin)}else{yposi<-c(3,13,seq(from=75,by=8,length.out=3))/100*yposilen+min(myymin)}
+      }else{ if(disper=="global"&enviro>1){yposi<-c(3,seq(from=62,by=8,length.out=4))/100*yposilen+min(myymin)}else{
+        yposi<-c(3,13,seq(from=70,by=8,length.out=3))/100*yposilen+min(myymin)}
+        }
       }else if(diver=="sp"){
         yposi<-seq(from=40,by=8,length.out=5)/100*yposilen+min(myymin)
       }else{
@@ -359,7 +365,7 @@ for (diver in c("sp","shannon","simpson" ,"invsimpson" )) {
     #x = pinx, y = piny, w = pinw, h = pinh, just = c("right", "bottom")
     pinx=1
     lengend_h<-0.02
-    piny=0.03
+    piny=0.04
     pinw=layweight*0.6
     pinh=layweight
     titlefontsize<-40
@@ -441,11 +447,28 @@ for (diver in c("sp","shannon","simpson" ,"invsimpson" )) {
     
     dev.off()
     #image_crop(image_read(jpgfile),geometry ="1300x2200+1200+420")
-    image_write(image_crop(image_read(jpgfile),geometry ="1300x2200+1150+420"),jpgfile)#看图像大小
+    image_write(image_crop(image_read(jpgfile),geometry ="1300x2200+1220+410"),jpgfile)#看图像大小
     
   }
   
 }
-lunwenlist
 
+jieguo<-data.frame("wu"=1,"hao"=1,"fu"=1,"qu"=1)
+for (index in 1:4) {
+  tiqu<-lunwenlist[index]
+  weizhi<-str_locate_all(tiqu,"参数组合")|>as.data.frame()
+  weizhi<-weizhi$start
+  for (i in 1:length(weizhi)) {
+    jieguo[index,i]<-str_extract_all(substr(tiqu,weizhi[i]-4,weizhi[i]-1), "\\d+")[[1]]|>as.numeric()
+  }
+}
+zongjie<-"总体而言，在总共300中参数（75*4种多样性指数）组合中，取样区域所在斑块大小与多样性之间无相关的占比pnoef%（nnoef种参数组合，p ≥ 0.05）正相关占比为pposi% (nposi种参数组合，p<0.05)，负相关占比为pneg% (nneg种参数组合，p<0.05)，单峰曲线占比为pgao%（ngao种参数组合）。"
+res_sum<-colSums(jieguo)|>as.vector()
+tivec<-c("pnoef","nnoef","pposi","nposi","pneg","nneg","pgao","ngao")
+for (ti in 1:4) {
+  zongjie<-gsub(tivec[ti*2-1],res_sum[ti]/sum(res_sum)*100,zongjie)
+  zongjie<-gsub(tivec[ti*2],res_sum[ti],zongjie)
+}
+lunwenlist
+zongjie
 
